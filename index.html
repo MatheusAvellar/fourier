@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="copyright" content="&copy; 2018 Matheus Avellar"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="author" content="Matheus Avellar"/>
+    <meta name="description" content="Fourier Transform!"/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet"/>
+    <title> Fourier Transform! </title>
+    <style type="text/css">
+* {
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+html, body {
+    min-height: 100%;
+    height: 100%;
+    min-width: 100%;
+    width: 100%;
+    margin: 0;
+}
+body {
+    color: #eee;
+    font-family: "Open Sans", sans-serif;
+    background-color: #101010;
+    display: grid;
+}
+main {
+    max-width: 512px;
+    margin: auto;
+    text-align: center;
+}
+canvas {
+    background-color: #1a1a1a;
+    border: 1px solid #fff;
+    display: block;
+    margin: 5px 0;
+}
+
+.custom-select {
+    position: relative;
+    display: inline-block;
+}
+.custom-select:after {
+    content: "▼";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    font-size: 60%;
+    line-height: 30px;
+    padding: 0 7px;
+    background-color: #2a2a2a;
+    color: #fff;
+    pointer-events: none;
+}
+.custom-select select {
+    display: inline-block;
+    padding: 4px 3px 3px 5px;
+    margin: 0;
+    font: inherit;
+    outline: none;
+    line-height: 1.2;
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 0;
+}
+.custom-select select[disabled] {
+    opacity: 0.3;
+}
+
+input, label, span {
+    user-select: none;
+}
+input[type=checkbox] {
+    display: none;
+}
+input[type=checkbox] ~ span {
+    cursor: pointer;
+    color: #7a7a7a;
+    border: 1px solid;
+    padding: 2px 4px;
+    line-height: 1.7em;
+}
+input[type=checkbox]:checked ~ span {
+    background-color: #1a1a1a;
+    color: #fff;
+}
+
+
+input[type=range] {
+  -webkit-appearance: none;
+    margin: 20px 10px;
+    width: 50%;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  box-shadow: 0;
+  background: #1a1a1a;
+  border-radius: 0.8px;
+  border: 1px solid #333333;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 0;
+  border: 1.1px solid #000000;
+  height: 25px;
+  width: 15px;
+  border-radius: 0;
+  background: #2a2a2a;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -10.5px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #343434;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  box-shadow: 0;
+  background: #1a1a1a;
+  border-radius: 0.8px;
+  border: 1px solid #333333;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 0;
+  border: 1.1px solid #000000;
+  height: 25px;
+  width: 15px;
+  border-radius: 0;
+  background: #2a2a2a;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #000000;
+  border: 1px solid #333333;
+  border-radius: 1.6px;
+  box-shadow: 0;
+}
+input[type=range]::-ms-fill-upper {
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 1.6px;
+  box-shadow: 0;
+}
+input[type=range]::-ms-thumb {
+  box-shadow:0;
+  border: 1.1px solid #000000;
+  height: 25px;
+  width: 15px;
+  border-radius: 0;
+  background: #2a2a2a;
+  cursor: pointer;
+  height: 6px;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #1a1a1a;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #343434;
+}
+
+
+    </style>
+    <script type="text/javascript" src="https://unpkg.com/mathjs@4.4.2/dist/math.min.js"></script>
+</head>
+<body onload="init();">
+    <main>
+        <canvas id="fun" width="512" height="256" data-y="Amplitude" data-x="Tempo">
+            <p>Seu browser não possui suporte para HTML canvas.</p>
+        </canvas>
+        <label title="Função" class="custom-select">
+            <select id="fun-select">
+                <option>sen(x)</option>
+                <option>cos(x)</option>
+                <option>sen(8x)</option>
+                <option>sen(128x)</option>
+                <option>sen(100x) + 2sen(150x)</option>
+                <option>sen(140x) × sen(20x)</option>
+                <option>sen(100x) × sen(120x)</option>
+                <option>sen(x)² - 0.5</option>
+                <option>(sen(32x) &gt; 0) ? 1 : -1</option>
+                <option>sen(4x²)</option>
+                <option>sen(eˣ)</option>
+            </select>
+        </label>
+        <input title="Zoom" id="resolution" type="range" min="25" value="100" max="1000"/>
+        <br>
+        <label><input id="show_all" type="checkbox" checked/> <span>Juntos</span> </label>
+        <label><input id="show_real" type="checkbox"/> <span>Real</span> </label>
+        <label><input id="show_imag"" type="checkbox"/> <span>Imaginário</span> </label>
+        <canvas id="fourier" width="512" height="256" data-y="Poder" data-x="Frequência">:(</canvas>
+        <p id="comment"></p>
+    </main>
+    <script type="text/javascript">
+        // Pega referências aos elementos da página
+        const resolution = document.getElementById("resolution");
+        const fun_select = document.getElementById("fun-select");
+        const show_all = document.getElementById("show_all");
+        const show_real = document.getElementById("show_real");
+        const show_imag = document.getElementById("show_imag");
+        const comment = document.getElementById("comment");
+
+        const fun = document.getElementById("fun");         // Canvas da função
+        const fun_ctx = fun.getContext("2d");
+        const fourier = document.getElementById("fourier"); // Canvas da trasnformação
+        const ctx = fourier.getContext("2d");
+
+        // Define o tamanho de cada canvas
+        const WIDTH = 512;
+        const HEIGHT = 256;
+
+        // Constantes a serem usadas pelo resto do código
+        const π = Math.PI;
+        const τ = 2*π;
+        const SIZE = 512;
+
+        // Função para ser plotada
+        let F = x => Math.sin(x);
+
+        // Funções que podem ser plotadas
+        const functions = [
+            x => Math.sin(x),
+            x => Math.cos(x),
+            x => Math.sin(8*x),
+            x => Math.sin(128*x),
+            x => Math.sin(100*x)+2*Math.sin(150*x),
+            x => Math.sin(140*x)*Math.sin(20*x),
+            x => Math.sin(100*x)*Math.sin(120*x),
+            x => Math.sin(x)**2-.5,
+            x => (Math.sin(32*x)>0)?1:-1,
+            x => Math.sin(4*x*x),
+            x => Math.sin(Math.exp(x))
+        ];
+
+        // 
+        let out_arr;
+        let in_arr;
+
+        // Funcção de inicialização
+        function init() {
+            // Configura o tamanho de cada canvas
+            fun.width = fourier.width = WIDTH;
+            fun.height = fourier.height = HEIGHT;
+
+            // Configura as interações com o usuário
+            resolution.onchange = drawFunction;
+            fun_select.onchange = changeFunction;
+            show_all.onclick = drawFourier;
+            show_real.onclick = drawFourier;
+            show_imag.onclick = drawFourier;
+
+            // Desenha a função F(t)
+            drawFunction();
+            // Calcula a Fourier Transform de F(t)
+            calculateFourier();
+            // Desenha a Fourier Transform de F(t)
+            drawFourier();
+        }
+
+        function changeFunction() {
+            F = functions[this.selectedIndex] || functions[0];
+            this.disabled = true;
+            setTimeout(function() {
+                drawFunction();
+                calculateFourier();
+                drawFourier();
+                fun_select.disabled = false;
+            }, 120);
+        }
+
+        function calculateFourier() {
+            in_arr = math.range(0, SIZE)._data.map(F);
+            out_arr = DFT(in_arr).splice(0,SIZE/2).concat(new Array(SIZE/2).fill(0));
+        }
+
+        function drawFunction() {
+            fun_ctx.clearRect(0,0,WIDTH,HEIGHT);
+
+            const res = resolution.value||1;
+
+            fun_ctx.fillStyle = "#303030";
+            // Desenha as linhas da grid da função
+            // (as linhas dependem do valor dos sliders, i.e. do 'zoom' aplicado pelo usuário)
+            for(let i = 0, s = WIDTH/res; i < WIDTH*21; i++) {
+                let pos;
+                if((pos = i/s) > WIDTH) break;
+                if(i%100) continue;
+                fun_ctx.fillRect(pos,0,1,HEIGHT);
+            }
+            for(let i = 0; i < HEIGHT/20; i++) {
+                let pos;
+                if((pos = i*20) > HEIGHT) break;
+                fun_ctx.fillRect(0,i*20,WIDTH,1);
+            }
+            fun_ctx.fillStyle = "#5f5f5f";
+            fun_ctx.font = "12px 'Open Sans'";
+            fun_ctx.fillText(fun.dataset.x, 10, HEIGHT-7.5);
+            fun_ctx.rotate(π/2);
+            fun_ctx.fillText(fun.dataset.y, 10, -10);
+            fun_ctx.fill();
+            fun_ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+            fun_ctx.translate(0, HEIGHT/2);
+            fun_ctx.fillStyle = "#ffffff";
+            for(let i = SIZE - 1; i >= 0; i--) {
+                let val = F(i/res)*20;
+                fun_ctx.fillRect(i,-val,1,1);
+            }
+
+            fun_ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+
+        function drawFourier() {
+            ctx.clearRect(0,0,WIDTH,HEIGHT);
+            ctx.fillStyle = "#303030";
+            for(let i = 0; i < WIDTH/20; i++) {
+                let pos;
+                if((pos = i*20) > WIDTH) break;
+                ctx.fillRect(i*20,0,1,HEIGHT);
+            }
+            for(let i = 0; i < HEIGHT/20; i++) {
+                let pos;
+                if((pos = i*20) > HEIGHT) break;
+                ctx.fillRect(0,i*20,WIDTH,1);
+            }
+            ctx.fillStyle = "#5f5f5f";
+            ctx.font = "12px 'Open Sans'";
+            ctx.fillText(fourier.dataset.x, 10, HEIGHT-7.5);
+            ctx.rotate(π/2);
+            ctx.fillText(fourier.dataset.y, 10, -10);
+            ctx.fill();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+            ctx.translate(0, HEIGHT);
+            for(let i = SIZE/2; i >= 0; i--) {
+                let real_y = Math.abs(out_arr[i].re)||0;
+                let imag_y = Math.abs(out_arr[i].im)||0;
+                if(show_all.checked) {
+                    let y = Math.sqrt(real_y**2 + imag_y**2) || 1;
+                    if(y < 1) y = 1;
+                    ctx.fillStyle = "#ff00ff";
+                    ctx.fillRect(i*2,-y,2,y);
+                }
+                if(show_real.checked) {
+                    ctx.fillStyle = "#00ffff";
+                    ctx.fillRect(i*2,-real_y,1,real_y);
+                }
+                if(show_imag.checked) {
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(i*2+1,-imag_y,1,imag_y);
+                }
+            }
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+        }
+
+        // Discrete Fourier Transform
+        function DFT(arr) {
+            // Código adaptado de:
+            // https://jakevdp.github.io/blog/2013/08/28/understanding-the-fft/
+
+            // A fórmula para calcular o Fourier Transform é:
+            //                   N-1
+            //            X[k] =  Σ  x[n] · e^(-i·2π·k·n / N)
+            //                   n=0
+            // Essa fórmula pode ser pensada como uma multiplicação de matriz:
+            //
+            //            M·x = X         (equivalente a Ax=b, mas estamos calculando b)
+            //
+            // sendo
+            //        M[k,n] = e^(-i·2π·k·n / N)
+            //        x[j] = F(j)                 para alguma função periódica F(t), como sen(t)
+
+            // Pega o tamanho do vetor
+            const N = arr.length;
+
+            // Cria um vetor de tamanho N com valores incrementais
+            // i.e. N = 512 -> [ 0, 1, 2, ..., 510, 511 ]
+            let n = math.range(0, N)._data; // Testado em https://jsperf.com/incremental-array
+                                            // mais rápido que 'let n = [...Array(SIZE).keys()];'
+
+            // Cria uma matriz de tamanho 1xN com os valores de n
+            // e.x. [ [0], [1], [2], ..., [510], [511] ]
+            let k = n.map(e=>[e]);
+
+            // Calcula k·n
+            let exp = product(k, n);
+            /*  Fazemos a multiplicação:
+                ⎡  0  ⎤ [ 0  1  ...  511 ]   ⎡  0   0   0   ...     0    ⎤
+                ⎢  1  ⎥                1xN   ⎢  0   1   2   ...    511   ⎥
+                ⎢  2  ⎥                    = ⎢  0   2   4   ...   1022   ⎥
+                ⎢ ... ⎥                      ⎢ ... ... ...  ...    ...   ⎥
+                ⎣ 511 ⎦                      ⎣  0  511 1022 ...  511·511 ⎦
+                     Nx1                                                NxN
+            */
+
+            // Calcula (-2π·k·n/N)
+            exp = exp.map(row => row.map(
+                    // Multiplica cada elemento por -2π/N
+                    el => -τ * el / N
+                )
+            );
+
+            // Calcula e^i·exp para cada item da matriz
+            // (usando a biblioteca math.js para calcular números complexos)
+            const M = exp.map(row => row.map(
+                    el =>  math.exp(math.complex(0, el))
+                )
+            );
+
+            // Já temos a matriz M, agora calculamos M·x, retornando o resultado
+            return math.multiply(M, arr);
+        }
+
+        function product(A, B) {
+            let out = [];
+            for(let i = A.length-1; i >= 0; i--) {
+                out[i] = [];
+                for (let j = B.length - 1; j >= 0; j--) {
+                    out[i][j] = A[i] * B[j];
+                }
+            }
+            return out;
+        }
+    </script>
+</body>
+</html>
